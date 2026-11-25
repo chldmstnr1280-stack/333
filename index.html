@@ -86,7 +86,7 @@ h1 .flask { display: inline-block; transform: rotate(-8deg); }
 
 /* ---------- tabs ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px;
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
   padding-block: 8px; background: var(--paper);
 }
@@ -96,7 +96,7 @@ h1 .flask { display: inline-block; transform: rotate(-8deg); }
   box-shadow: var(--shadow); transition: transform .12s;
 }
 .tab .ico { font-size: 22px; line-height: 1; }
-.tab .lbl { font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tab .lbl { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .tab[aria-selected="true"] {
   background: var(--violet); border-color: var(--violet); color: var(--on-accent);
   transform: translateY(-2px);
@@ -256,6 +256,37 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   display: grid; place-items: center; font-size: 13px; font-weight: 700; margin-top: 2px;
 }
 
+/* ---------- ladder ---------- */
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper .small-btn { width: 36px; height: 36px; padding: 0; font-size: 20px; line-height: 1; border-radius: 50%; }
+.stepper output { font-family: var(--f-hand); font-weight: 700; font-size: 22px; min-width: 3ch; text-align: center; }
+.ladder { display: grid; gap: 4px; }
+.lad-row { display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); }
+.lad-row > * { margin: 0 2px; min-width: 0; }
+.lad-row input {
+  font: inherit; font-size: 14px; text-align: center; padding: 7px 2px; width: 100%;
+  border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink);
+}
+.lad-pick {
+  border: 2px solid var(--c); background: var(--card); border-radius: 10px; padding: 6px 2px;
+  font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 0 2px 0 var(--c);
+}
+.lad-pick.done { background: var(--c); color: #fff; }
+.lad-res {
+  border: 1.5px dashed var(--line); border-radius: 10px; padding: 6px 2px; text-align: center;
+  font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted);
+}
+.lad-res.open { border-style: solid; border-color: var(--c); color: var(--ink); font-weight: 700; animation: land .45s cubic-bezier(.3,1.7,.5,1); }
+#ladder-svg { width: 100%; height: 260px; display: block; }
+.lad-v { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.lad-h { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.lad-cover { fill: var(--violet-soft); }
+.lad-cover-text { fill: var(--violet); font-family: var(--f-hand); font-weight: 700; font-size: 20px; }
+.lad-path { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.lad-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.lad-actions .go { flex: 1 1 auto; }
+
 /* ---------- log ---------- */
 .log { display: grid; gap: 10px; }
 .log-head { display: flex; justify-content: space-between; align-items: center; }
@@ -293,6 +324,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     <button class="tab" role="tab" id="tab-menu" data-view="menu" aria-selected="false"><span class="ico" aria-hidden="true">🍜</span><span class="lbl">메뉴</span></button>
     <button class="tab" role="tab" id="tab-roulette" data-view="roulette" aria-selected="false"><span class="ico" aria-hidden="true">🎡</span><span class="lbl">룰렛</span></button>
     <button class="tab" role="tab" id="tab-coin" data-view="coin" aria-selected="false"><span class="ico" aria-hidden="true">🎲</span><span class="lbl">주사위</span></button>
+    <button class="tab" role="tab" id="tab-ladder" data-view="ladder" aria-selected="false"><span class="ico" aria-hidden="true">🪜</span><span class="lbl">사다리</span></button>
     <button class="tab" role="tab" id="tab-tarot" data-view="tarot" aria-selected="false"><span class="ico" aria-hidden="true">🃏</span><span class="lbl">운 카드</span></button>
   </nav>
 
@@ -367,6 +399,32 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     </div>
   </section>
 
+  <!-- 사다리 -->
+  <section class="bench" id="view-ladder" role="tabpanel" aria-labelledby="tab-ladder" hidden>
+    <div class="bench-head"><h2>사다리 타기</h2><span class="exp-no">EXP-06 · 2~8명</span></div>
+    <p class="hypo">가설: 사다리는 누구 편도 들지 않는다.</p>
+    <div class="row">
+      <div class="stepper" role="group" aria-label="인원 수">
+        <button class="small-btn" id="lad-minus" aria-label="한 명 빼기">−</button>
+        <output id="lad-n" aria-live="polite">4명</output>
+        <button class="small-btn" id="lad-plus" aria-label="한 명 더하기">+</button>
+      </div>
+      <button class="chip" data-lpreset="coffee">커피 내기</button>
+      <button class="chip" data-lpreset="chores">청소 당번</button>
+    </div>
+    <div class="ladder" id="ladder">
+      <div class="lad-row" id="lad-top"></div>
+      <svg id="ladder-svg" role="img" aria-label="사다리"></svg>
+      <div class="lad-row" id="lad-bot"></div>
+    </div>
+    <p class="verdict" id="ladder-verdict" aria-live="polite">위엔 이름, 아래엔 결과를 적고 시작하세요</p>
+    <div class="lad-actions">
+      <button class="go" id="ladder-go">사다리 만들기</button>
+      <button class="small-btn" id="ladder-all" hidden>전체 결과 보기</button>
+      <button class="small-btn" id="ladder-reset" hidden>다시 설정</button>
+    </div>
+  </section>
+
   <!-- 타로 -->
   <section class="bench" id="view-tarot" role="tabpanel" aria-labelledby="tab-tarot" hidden>
     <div class="bench-head"><h2>오늘의 운 카드</h2><span class="exp-no">EXP-05 · 메이저 아르카나 22장</span></div>
@@ -414,12 +472,13 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   /* ---------------- tabs ---------------- */
-  const views = ["lotto", "menu", "roulette", "coin", "tarot"];
+  const views = ["lotto", "menu", "roulette", "coin", "ladder", "tarot"];
   function show(v) {
     if (!views.includes(v)) v = "lotto";
     $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === v)));
     views.forEach((x) => { $("#view-" + x).hidden = x !== v; });
     if (v === "roulette") drawWheel();
+    if (v === "ladder") drawLadder();
   }
   $$(".tab").forEach((t) => t.addEventListener("click", () => {
     const v = t.dataset.view;
@@ -657,6 +716,134 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     btn.disabled = false;
   });
 
+  /* ---------------- ladder ---------------- */
+  const LCOLORS = ["#7353D1", "#EE5A42", "#E0A100", "#3E9A63", "#3D9FDB", "#E2649A", "#8E7CC3", "#F08A4B"];
+  const LPRESETS = {
+    coffee: { names: ["가", "나", "다", "라"], prizes: ["커피 쏘기", "통과", "통과", "통과"] },
+    chores: { names: ["가", "나", "다", "라"], prizes: ["설거지", "분리수거", "청소기", "휴식"] },
+  };
+  const ROWS = 9;
+  const L = store.get("ladder", { names: ["지민", "서준", "하윤", "도윤"], prizes: ["꽝", "당첨", "꽝", "커피 쏘기"] });
+  let lplay = false, rungs = [], ldone = new Map(), lbusy = false;
+  const ln = () => L.names.length;
+  const saveL = () => store.set("ladder", { names: L.names, prizes: L.prizes });
+  const svgEl = $("#ladder-svg");
+
+  function resize(n) {
+    n = Math.max(2, Math.min(8, n));
+    while (L.names.length < n) { L.names.push(String(L.names.length + 1) + "번"); L.prizes.push("꽝"); }
+    L.names.length = n; L.prizes.length = n; saveL(); renderLadder();
+  }
+  $("#lad-minus").addEventListener("click", () => { if (!lplay) resize(ln() - 1); });
+  $("#lad-plus").addEventListener("click", () => { if (!lplay) resize(ln() + 1); });
+  $$("[data-lpreset]").forEach((b) => b.addEventListener("click", () => {
+    if (lplay) return;
+    const p = LPRESETS[b.dataset.lpreset], n = ln();
+    L.prizes = Array.from({ length: n }, (_, i) => p.prizes[i] ?? p.prizes[p.prizes.length - 1]);
+    if (b.dataset.lpreset === "coffee") L.prizes = L.prizes.map((_, i) => (i === 0 ? "커피 쏘기" : "통과"));
+    saveL(); renderLadder();
+  }));
+
+  function makeRungs(n) {
+    const rs = Array.from({ length: ROWS }, () => new Set());
+    for (let r = 0; r < ROWS; r++) for (let g = 0; g < n - 1; g++) {
+      if (!rs[r].has(g - 1) && rint(100) < 45) rs[r].add(g);
+    }
+    for (let g = 0; g < n - 1; g++) {            // every gap gets at least one rung
+      if (rs.some((s) => s.has(g))) continue;
+      const ok = rs.map((s, r) => r).filter((r) => !rs[r].has(g - 1) && !rs[r].has(g + 1));
+      rs[ok.length ? pick(ok) : rint(ROWS)].add(g);
+    }
+    return rs;
+  }
+  const geo = () => { const W = svgEl.clientWidth || 320, H = svgEl.clientHeight || 260, n = ln(); return { W, H, n, x: (i) => (i + 0.5) * W / n, y: (r) => 14 + (r + 1) * (H - 28) / (ROWS + 1) }; };
+  function tracePts(col) {
+    const { H, x, y } = geo(); let c = col; const pts = [[x(c), 0]];
+    for (let r = 0; r < ROWS; r++) {
+      if (rungs[r].has(c)) { pts.push([x(c), y(r)], [x(c + 1), y(r)]); c++; }
+      else if (rungs[r].has(c - 1)) { pts.push([x(c), y(r)], [x(c - 1), y(r)]); c--; }
+    }
+    pts.push([x(c), H]); return { pts, end: c };
+  }
+  const ptsAttr = (pts) => pts.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" ");
+  function drawLadder() {
+    const { W, H, n, x, y } = geo();
+    svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    let h = "";
+    for (let i = 0; i < n; i++) h += `<line class="lad-v" x1="${x(i)}" y1="0" x2="${x(i)}" y2="${H}"/>`;
+    if (lplay) {
+      rungs.forEach((s, r) => s.forEach((g) => { h += `<line class="lad-h" x1="${x(g)}" y1="${y(r)}" x2="${x(g + 1)}" y2="${y(r)}"/>`; }));
+      ldone.forEach((_, col) => { h += `<polyline class="lad-path" stroke="${LCOLORS[col]}" points="${ptsAttr(tracePts(col).pts)}"/>`; });
+    } else {
+      h += `<rect class="lad-cover" x="0" y="${H * 0.22}" width="${W}" height="${H * 0.56}" rx="14"/>`;
+      h += `<text class="lad-cover-text" x="${W / 2}" y="${H / 2 + 7}" text-anchor="middle">가로줄은 시작하면 생겨요</text>`;
+    }
+    svgEl.innerHTML = h;
+  }
+  function renderLadder() {
+    const n = ln();
+    $("#ladder").style.setProperty("--n", n);
+    $("#lad-n").textContent = n + "명";
+    const top = $("#lad-top"), bot = $("#lad-bot");
+    if (!lplay) {
+      top.innerHTML = L.names.map((v, i) => `<input id="lad-name-${i}" data-i="${i}" maxlength="8" value="${esc(v)}" aria-label="${i + 1}번째 이름" style="border-color:${LCOLORS[i]}">`).join("");
+      bot.innerHTML = L.prizes.map((v, i) => `<input id="lad-prize-${i}" data-i="${i}" maxlength="10" value="${esc(v)}" aria-label="${i + 1}번째 결과">`).join("");
+      $$("input", top).forEach((el) => el.addEventListener("input", () => { L.names[+el.dataset.i] = el.value; saveL(); }));
+      $$("input", bot).forEach((el) => el.addEventListener("input", () => { L.prizes[+el.dataset.i] = el.value; saveL(); }));
+    } else {
+      top.innerHTML = L.names.map((v, i) => `<button class="lad-pick${ldone.has(i) ? " done" : ""}" data-col="${i}" style="--c:${LCOLORS[i]}">${esc(v || i + 1 + "번")}</button>`).join("");
+      const owner = new Map([...ldone].map(([col, end]) => [end, col]));
+      bot.innerHTML = L.prizes.map((v, i) => owner.has(i)
+        ? `<span class="lad-res open" style="--c:${LCOLORS[owner.get(i)]}">${esc(v || "?")}</span>`
+        : `<span class="lad-res">?</span>`).join("");
+      $$(".lad-pick", top).forEach((b) => b.addEventListener("click", () => runTrace(+b.dataset.col, true)));
+    }
+    $("#ladder-go").hidden = lplay;
+    $("#ladder-all").hidden = !lplay;
+    $("#ladder-reset").hidden = !lplay;
+    drawLadder();
+  }
+  const isWin = (p) => /당첨|커피|쏘기|벌칙/.test(p);
+  async function runTrace(col, log) {
+    const name = L.names[col] || col + 1 + "번";
+    if (ldone.has(col)) { $("#ladder-verdict").innerHTML = `${esc(name)} → <b style="color:var(--tomato)">${esc(L.prizes[ldone.get(col)] || "?")}</b>`; return; }
+    if (lbusy) return; lbusy = true;
+    const { pts, end } = tracePts(col);
+    const pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    pl.setAttribute("class", "lad-path"); pl.setAttribute("stroke", LCOLORS[col]); pl.setAttribute("points", ptsAttr(pts));
+    svgEl.appendChild(pl);
+    const len = pts.reduce((a, p, i) => i ? a + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0);
+    if (!reduce) {
+      pl.style.strokeDasharray = len; pl.style.strokeDashoffset = len;
+      pl.getBoundingClientRect();
+      pl.style.transition = "stroke-dashoffset 1.3s linear"; pl.style.strokeDashoffset = 0;
+    }
+    $("#ladder-verdict").textContent = `${name} 내려가는 중…`;
+    await sleep(1350);
+    ldone.set(col, end); lbusy = false;
+    const prize = L.prizes[end] || "?";
+    renderLadder();
+    $("#ladder-verdict").innerHTML = `${esc(name)} → <b style="color:var(--tomato)">${esc(prize)}</b>`;
+    buzz(25);
+    if (log) { addLog("사다리", `${name} → ${prize}`); if (isWin(prize)) confetti(60); }
+    if (ldone.size === ln()) $("#ladder-all").hidden = true;
+  }
+  $("#ladder-go").addEventListener("click", () => {
+    if (ln() < 2) return;
+    lplay = true; rungs = makeRungs(ln()); ldone = new Map();
+    renderLadder();
+    $("#ladder-verdict").textContent = "이름을 눌러 사다리를 타보세요";
+  });
+  $("#ladder-all").addEventListener("click", async () => {
+    if (lbusy) return;
+    for (let i = 0; i < ln(); i++) if (!ldone.has(i)) await runTrace(i, false);
+    const sum = L.names.map((nm, i) => `${nm || i + 1 + "번"}→${L.prizes[ldone.get(i)] || "?"}`).join(", ");
+    $("#ladder-verdict").textContent = "모든 결과가 나왔어요!";
+    $("#ladder-all").hidden = true;
+    addLog("사다리", sum); confetti(70);
+  });
+  $("#ladder-reset").addEventListener("click", () => { if (lbusy) return; lplay = false; ldone = new Map(); renderLadder(); $("#ladder-verdict").textContent = "위엔 이름, 아래엔 결과를 적고 시작하세요"; });
+
   /* ---------------- tarot ---------------- */
   const TAROT = [
     ["0", "광대", "THE FOOL", "🎒", "새로운 출발 · 즉흥", "계획 없이 떠나는 발걸음이 오늘의 행운을 불러와요. 완벽하게 준비되지 않아도 괜찮아요.", ["처음 가보는 길로 돌아가기", "충동적으로 작은 도전 하나"]],
@@ -709,8 +896,9 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   renderLog();
   runLotto(false);          // the page opens with a ready-made set of numbers
   dealTarot();
+  renderLadder();
   show(location.hash.slice(1));
-  addEventListener("resize", () => { if (!$("#view-roulette").hidden) drawWheel(); });
+  addEventListener("resize", () => { if (!$("#view-roulette").hidden) drawWheel(); if (!$("#view-ladder").hidden && !lbusy) drawLadder(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawWheel);
 })();
 </script>
