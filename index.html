@@ -111,6 +111,55 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .luck-foot .small-btn { background: var(--violet-soft); border-color: var(--violet); color: var(--violet); font-weight: 700; }
 @media (max-width: 360px) { .luck-body { grid-template-columns: 1fr; justify-items: center; } }
 
+/* ---------- lotto simulation ---------- */
+.sim { border-top: 2px dashed var(--line); padding-top: 16px; display: grid; gap: 12px; }
+.sim h3 { margin: 0; font-family: var(--f-hand); font-size: 24px; line-height: 1.1; }
+.sim .go { font-size: 20px; background: var(--card); color: var(--violet); border: 2px solid var(--violet); box-shadow: 0 3px 0 var(--violet); }
+.sim .go:active { box-shadow: 0 1px 0 var(--violet); }
+.sim-status { font-family: var(--f-mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.4em; margin: 0; }
+.chart-box { position: relative; }
+.chart-title { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 0 0 6px; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.chart-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.chart-legend i.dash { height: 0; border-top: 2px dashed var(--muted); width: 14px; border-radius: 0; }
+#freq-svg { width: 100%; height: 190px; display: block; overflow: visible; }
+.ax { fill: var(--muted); font-family: var(--f-mono); font-size: 10px; }
+.gridl { stroke: var(--line); stroke-width: 1; }
+.avgl { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.bar { fill: var(--violet); }
+.bar.hot { fill: var(--tomato); }
+.bar.dim { opacity: .35; }
+.hit { fill: transparent; cursor: crosshair; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 12.5px;
+  padding: 4px 8px; border-radius: 8px; white-space: nowrap; transform: translate(-50%, -110%); z-index: 2;
+  font-variant-numeric: tabular-nums;
+}
+.hotcold { display: grid; gap: 8px; }
+.hotcold .lab { font-size: 13px; color: var(--muted); }
+.ball.sm { width: 32px; height: 32px; font-size: 13.5px; }
+.prize-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.prize-table th, .prize-table td { padding: 6px 4px; border-bottom: 1px dashed var(--line); text-align: right; }
+.prize-table th:first-child, .prize-table td:first-child { text-align: left; }
+.prize-table thead th { font-size: 12px; color: var(--muted); font-weight: 400; }
+.prize-table tfoot td { font-weight: 700; border-bottom: none; }
+.prize-table .neg { color: var(--tomato); }
+.sim-note { margin: 0; font-size: 12px; color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+
+/* ---------- number picker ---------- */
+.num-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.num-grid label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.num-grid input { text-align: center; font-family: var(--f-mono); font-size: 18px; padding: 8px 4px; }
+.num-out { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 64px; align-items: center; }
+.num-chip {
+  min-width: 56px; padding: 8px 12px; border-radius: 14px; border: 2px solid var(--ink); background: var(--paper);
+  font-family: var(--f-mono); font-weight: 600; font-size: 24px; text-align: center; box-shadow: 0 3px 0 var(--ink);
+  font-variant-numeric: tabular-nums; animation: pop .38s cubic-bezier(.3,1.6,.5,1) both;
+}
+.num-out.many .num-chip { min-width: 44px; font-size: 17px; padding: 5px 8px; }
+
 /* ---------- teams ---------- */
 .teams-out { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .team { border: 2px solid var(--c); border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; }
@@ -393,6 +442,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     <button class="tab" role="tab" id="tab-coin" data-view="coin" aria-selected="false"><span class="ico" aria-hidden="true">🎲</span><span class="lbl">주사위</span></button>
     <button class="tab" role="tab" id="tab-ladder" data-view="ladder" aria-selected="false"><span class="ico" aria-hidden="true">🪜</span><span class="lbl">사다리</span></button>
     <button class="tab" role="tab" id="tab-team" data-view="team" aria-selected="false"><span class="ico" aria-hidden="true">👥</span><span class="lbl">팀 나누기</span></button>
+    <button class="tab" role="tab" id="tab-number" data-view="number" aria-selected="false"><span class="ico" aria-hidden="true">🔢</span><span class="lbl">숫자</span></button>
     <button class="tab" role="tab" id="tab-tarot" data-view="tarot" aria-selected="false"><span class="ico" aria-hidden="true">🃏</span><span class="lbl">운 카드</span></button>
   </nav>
 
@@ -407,6 +457,40 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     </div>
     <div class="games" id="lotto-out" aria-live="polite"></div>
     <button class="go" id="lotto-go">번호 뽑기</button>
+
+    <div class="sim" aria-labelledby="sim-title">
+      <div class="bench-head"><h3 id="sim-title">로또 실험 모드</h3><span class="exp-no">EXP-01b · 시뮬레이션</span></div>
+      <p class="hypo">가설: 매주 같은 번호를 사면 언젠가는 1등이 된다. A게임 번호로 직접 확인해 봐요.</p>
+      <div class="row" role="group" aria-label="실험 횟수">
+        <button class="chip" data-sim="1040" aria-pressed="true">20년 (1,040회)</button>
+        <button class="chip" data-sim="10000" aria-pressed="false">1만 회</button>
+        <button class="chip" data-sim="100000" aria-pressed="false">10만 회</button>
+        <button class="chip" data-sim="1000000" aria-pressed="false">100만 회</button>
+      </div>
+      <button class="go" id="sim-go">실험 시작</button>
+      <p class="sim-status" id="sim-status" aria-live="polite"></p>
+      <div id="sim-out" hidden>
+        <div class="table-scroll">
+          <table class="prize-table">
+            <thead><tr><th>등수 (맞힌 개수)</th><th>횟수</th><th>당첨금 합계</th></tr></thead>
+            <tbody id="prize-body"></tbody>
+            <tfoot><tr><td>쓴 돈 → 받은 돈</td><td colspan="2" id="prize-total"></td></tr></tfoot>
+          </table>
+        </div>
+        <p class="sim-note">게임당 1,000원 · 당첨금은 평균치 가정 (1등 20억, 2등 5천만, 3등 150만, 4등 5만, 5등 5천 원)</p>
+        <div class="chart-box" id="chart-box">
+          <p class="chart-title">번호별로 나온 횟수 (당첨 번호 기준)</p>
+          <div class="chart-legend"><span><i style="background:var(--tomato)"></i>가장 많이 나온 6개</span><span><i style="background:var(--violet)"></i>나머지</span><span><i class="dash"></i>평균</span></div>
+          <p class="sim-note" id="freq-insight"></p>
+          <svg id="freq-svg" role="img" aria-label="1부터 45까지 번호별 출현 횟수 막대그래프"></svg>
+          <div class="tip" id="freq-tip" hidden></div>
+        </div>
+        <div class="hotcold">
+          <span class="lab">가장 많이 나온 번호</span><div class="balls" id="hot-balls"></div>
+          <span class="lab">가장 적게 나온 번호</span><div class="balls" id="cold-balls"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 메뉴 -->
@@ -517,6 +601,26 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     <button class="small-btn" id="team-copy" hidden>결과 복사하기</button>
   </section>
 
+  <!-- 숫자 뽑기 -->
+  <section class="bench" id="view-number" role="tabpanel" aria-labelledby="tab-number" hidden>
+    <div class="bench-head"><h2>숫자 뽑기</h2><span class="exp-no">EXP-08 · 경품·순서·자리</span></div>
+    <p class="hypo">가설: 숫자에도 기분이 있다.</p>
+    <div class="num-grid">
+      <label for="num-min">부터<input type="number" id="num-min" inputmode="numeric"></label>
+      <label for="num-max">까지<input type="number" id="num-max" inputmode="numeric"></label>
+      <label for="num-count">몇 개<input type="number" id="num-count" inputmode="numeric" min="1" max="100"></label>
+    </div>
+    <div class="row">
+      <button class="chip" id="num-dup" aria-pressed="false">중복 허용</button>
+      <button class="chip" id="num-sort" aria-pressed="true">작은 수부터 정렬</button>
+      <button class="chip" data-nrange="1,100,1">1~100</button>
+      <button class="chip" data-nrange="1,30,3">경품 3명 (1~30)</button>
+    </div>
+    <div class="num-out" id="num-out" aria-live="polite"></div>
+    <p class="verdict" id="num-verdict"></p>
+    <button class="go" id="num-go">숫자 뽑기</button>
+  </section>
+
   <!-- 타로 -->
   <section class="bench" id="view-tarot" role="tabpanel" aria-labelledby="tab-tarot" hidden>
     <div class="bench-head"><h2>오늘의 운 카드</h2><span class="exp-no">EXP-05 · 메이저 아르카나 22장</span></div>
@@ -615,7 +719,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   sbtn.addEventListener("click", () => { SFX.toggle(); paintSound(); });
 
   /* ---------------- tabs ---------------- */
-  const views = ["lotto", "menu", "roulette", "coin", "ladder", "team", "tarot"];
+  const views = ["lotto", "menu", "roulette", "coin", "ladder", "team", "number", "tarot"];
   function show(v) {
     if (!views.includes(v)) v = "lotto";
     $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === v)));
@@ -676,7 +780,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   }
 
   /* ---------------- lotto ---------------- */
-  let games = 5, withBonus = false;
+  let games = 5, withBonus = false, lastLotto = null;
   const ballClass = (n) => "b" + Math.min(5, Math.ceil(n / 10));
   $$("[data-games]").forEach((b) => b.addEventListener("click", () => {
     games = +b.dataset.games;
@@ -709,6 +813,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
         if (animate) { buzz(8); SFX.pop(); await sleep(games > 1 ? 70 : 160); }
       }
     }
+    lastLotto = results[0];
     btn.disabled = false;
     if (animate) {
       confetti(60); SFX.win();
@@ -1004,6 +1109,134 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   });
   $("#ladder-reset").addEventListener("click", () => { if (lbusy) return; lplay = false; ldone = new Map(); renderLadder(); $("#ladder-verdict").textContent = "위엔 이름, 아래엔 결과를 적고 시작하세요"; });
 
+  /* ---------------- lotto simulation ---------------- */
+  const PRIZES = [["1등", "6개", 2e9], ["2등", "5개+보너스", 5e7], ["3등", "5개", 1.5e6], ["4등", "4개", 5e4], ["5등", "3개", 5e3]];
+  let simN = 1040, simBusy = false, lastFreq = null;
+  const won = (v) => v >= 1e8 ? (v / 1e8).toLocaleString("ko-KR", { maximumFractionDigits: 1 }) + "억 원" : v >= 1e4 ? Math.round(v / 1e4).toLocaleString("ko-KR") + "만 원" : v.toLocaleString("ko-KR") + "원";
+  $$("[data-sim]").forEach((b) => b.addEventListener("click", () => {
+    simN = +b.dataset.sim; $$("[data-sim]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+  function fastDraw(pool) {                       // partial Fisher–Yates: 7 numbers (6 + bonus)
+    for (let i = 0; i < 7; i++) { const j = i + Math.floor(Math.random() * (45 - i)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  }
+  $("#sim-go").addEventListener("click", async () => {
+    if (simBusy) return; simBusy = true; $("#sim-go").disabled = true;
+    if (!lastLotto) lastLotto = drawLotto();
+    const mine = new Uint8Array(46); lastLotto.main.forEach((n) => { mine[n] = 1; });
+    const freq = new Array(46).fill(0), hits = [0, 0, 0, 0, 0], pool = Array.from({ length: 45 }, (_, i) => i + 1);
+    const N = simN, CH = 20000; let done = 0;
+    const st = $("#sim-status");
+    while (done < N) {
+      const end = Math.min(N, done + CH);
+      for (; done < end; done++) {
+        fastDraw(pool); let m = 0;
+        for (let i = 0; i < 6; i++) { const v = pool[i]; freq[v]++; m += mine[v]; }
+        if (m === 6) hits[0]++; else if (m === 5) hits[mine[pool[6]] ? 1 : 2]++; else if (m === 4) hits[3]++; else if (m === 3) hits[4]++;
+      }
+      st.textContent = `A게임 [${lastLotto.main.join(" ")}] 으로 실험 중… ${done.toLocaleString("ko-KR")} / ${N.toLocaleString("ko-KR")}`;
+      SFX.tick();
+      await new Promise((r) => setTimeout(r, reduce ? 0 : 30));
+    }
+    const spent = N * 1000, gain = hits.reduce((a, h, i) => a + h * PRIZES[i][2], 0);
+    $("#prize-body").innerHTML = PRIZES.map(([rank, cond, amt], i) =>
+      `<tr><td>${rank} <span style="color:var(--muted)">(${cond})</span></td><td>${hits[i].toLocaleString("ko-KR")}번</td><td>${won(hits[i] * amt)}</td></tr>`).join("");
+    const rate = Math.round((gain / spent) * 100);
+    $("#prize-total").innerHTML = `${won(spent)} → <span class="${gain < spent ? "neg" : ""}">${won(gain)}</span> (회수율 ${rate}%)`;
+    const yrs = N / 52;
+    st.textContent = `A게임 [${lastLotto.main.join(" ")}] · 매주 1장씩 샀다면 약 ${yrs >= 1 ? Math.round(yrs).toLocaleString("ko-KR") + "년" : N + "주"} 동안의 결과예요`;
+    $("#sim-out").hidden = false;
+    lastFreq = freq; drawFreq();
+    const order = pool.slice().sort((a, b) => a - b).sort((a, b) => freq[b] - freq[a]);
+    const ballRow = (arr) => arr.slice().sort((a, b) => a - b).map((n) => `<span class="ball sm ${ballClass(n)}">${n}</span>`).join("");
+    $("#hot-balls").innerHTML = ballRow(order.slice(0, 6));
+    $("#cold-balls").innerHTML = ballRow(order.slice(-6));
+    if (hits[0]) { confetti(120); SFX.win(); } else if (gain >= spent) SFX.win(); else SFX.boo();
+    addLog("로또 실험", `${N.toLocaleString("ko-KR")}회 · 1등 ${hits[0]} / 5등 ${hits[4]} · 회수율 ${rate}%`);
+    simBusy = false; $("#sim-go").disabled = false;
+  });
+  function drawFreq() {
+    const freq = lastFreq; if (!freq) return;
+    const svg = $("#freq-svg"), W = svg.clientWidth || 340, H = svg.clientHeight || 190;
+    const pl = 34, pr = 4, pt = 8, pb = 20, cw = (W - pl - pr) / 45;
+    const vals = freq.slice(1), max = Math.max(...vals), avg = vals.reduce((a, b) => a + b, 0) / 45;
+    const step = (() => { const raw = max / 3, p = 10 ** Math.floor(Math.log10(raw || 1)); return [1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= raw); })();
+    const top = Math.ceil(max / step) * step || 1, y = (v) => pt + (H - pt - pb) * (1 - v / top);
+    const hot = new Set(vals.map((v, i) => [v, i + 1]).sort((a, b) => b[0] - a[0]).slice(0, 6).map((x) => x[1]));
+    const fmt = (v) => v >= 10000 ? (v / 1000).toLocaleString("ko-KR") + "k" : v.toLocaleString("ko-KR");
+    let h = "";
+    for (let v = 0; v <= top; v += step) h += `<line class="gridl" x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${pl - 5}" y="${y(v) + 3}" text-anchor="end">${fmt(v)}</text>`;
+    for (let n = 1; n <= 45; n++) {
+      const x = pl + (n - 1) * cw, bw = Math.max(1, cw - 2), yy = y(freq[n]), bh = H - pb - yy, r = Math.min(2, bw / 2, bh);
+      h += `<path class="bar${hot.has(n) ? " hot" : ""}" data-n="${n}" d="M${x + 1},${H - pb} V${yy + r} Q${x + 1},${yy} ${x + 1 + r},${yy} H${x + 1 + bw - r} Q${x + 1 + bw},${yy} ${x + 1 + bw},${yy + r} V${H - pb} Z"/>`;
+      if (n === 1 || n % 5 === 0) h += `<text class="ax" x="${x + cw / 2}" y="${H - 6}" text-anchor="middle">${n}</text>`;
+    }
+    h += `<line class="avgl" x1="${pl}" x2="${W - pr}" y1="${y(avg)}" y2="${y(avg)}"/>`;
+    for (let n = 1; n <= 45; n++) h += `<rect class="hit" data-n="${n}" x="${pl + (n - 1) * cw}" y="${pt}" width="${cw}" height="${H - pt - pb}"/>`;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = h;
+    const mn = Math.min(...vals), gapPct = avg ? Math.round(((max - mn) / avg) * 1000) / 10 : 0;
+    $("#freq-insight").textContent = `제일 많이 나온 번호와 제일 적게 나온 번호의 차이는 ${(max - mn).toLocaleString("ko-KR")}회 (평균의 ${gapPct}%). 횟수를 늘릴수록 막대 높이가 같아져요. 잘 나오는 번호는 따로 없어요.`;
+    const tip = $("#freq-tip"), box = $("#chart-box");
+    const showTip = (n, cx) => {
+      $$(".bar", svg).forEach((b) => b.classList.toggle("dim", +b.dataset.n !== n));
+      const diff = freq[n] - avg, pct = avg ? Math.round((diff / avg) * 1000) / 10 : 0;
+      tip.textContent = `${n}번 · ${freq[n].toLocaleString("ko-KR")}회 (평균 대비 ${pct >= 0 ? "+" : ""}${pct}%)`;
+      const sr = svg.getBoundingClientRect(), br = box.getBoundingClientRect();
+      tip.hidden = false;
+      const half = tip.offsetWidth / 2, left = Math.min(Math.max(cx - br.left, half), br.width - half);
+      tip.style.left = left + "px"; tip.style.top = (sr.top - br.top + y(freq[n])) + "px";
+    };
+    const hide = () => { tip.hidden = true; $$(".bar", svg).forEach((b) => b.classList.remove("dim")); };
+    $$(".hit", svg).forEach((r) => {
+      r.addEventListener("pointerenter", (e) => showTip(+r.dataset.n, e.clientX));
+      r.addEventListener("pointerdown", (e) => showTip(+r.dataset.n, e.clientX));
+    });
+    svg.addEventListener("pointerleave", hide);
+  }
+  addEventListener("resize", () => { if (lastFreq && !$("#view-lotto").hidden) drawFreq(); });
+
+  /* ---------------- number picker ---------------- */
+  const NP = store.get("numPick", { min: 1, max: 100, count: 1, dup: false, sort: true });
+  $("#num-min").value = NP.min; $("#num-max").value = NP.max; $("#num-count").value = NP.count;
+  const paintNP = () => { $("#num-dup").setAttribute("aria-pressed", String(NP.dup)); $("#num-sort").setAttribute("aria-pressed", String(NP.sort)); };
+  paintNP();
+  const saveNP = () => { NP.min = +$("#num-min").value; NP.max = +$("#num-max").value; NP.count = +$("#num-count").value; store.set("numPick", NP); };
+  ["#num-min", "#num-max", "#num-count"].forEach((id) => $(id).addEventListener("input", saveNP));
+  $("#num-dup").addEventListener("click", () => { NP.dup = !NP.dup; paintNP(); store.set("numPick", NP); });
+  $("#num-sort").addEventListener("click", () => { NP.sort = !NP.sort; paintNP(); store.set("numPick", NP); });
+  $$("[data-nrange]").forEach((b) => b.addEventListener("click", () => {
+    const [a, z, c] = b.dataset.nrange.split(",").map(Number);
+    $("#num-min").value = a; $("#num-max").value = z; $("#num-count").value = c; saveNP();
+  }));
+  $("#num-go").addEventListener("click", async () => {
+    let lo = Math.trunc(+$("#num-min").value), hi = Math.trunc(+$("#num-max").value), cnt = Math.trunc(+$("#num-count").value);
+    const v = $("#num-verdict");
+    if (!Number.isFinite(lo) || !Number.isFinite(hi) || $("#num-min").value === "" || $("#num-max").value === "") { v.textContent = "시작과 끝 숫자를 적어 주세요"; return; }
+    if (lo > hi) [lo, hi] = [hi, lo];
+    if (!(cnt >= 1)) cnt = 1;
+    if (cnt > 100) { v.textContent = "한 번에 100개까지 뽑을 수 있어요"; return; }
+    const span = hi - lo + 1;
+    if (span > 1e9) { v.textContent = "범위가 너무 넓어요. 10억 칸 안으로 줄여 주세요"; return; }
+    if (!NP.dup && cnt > span) { v.textContent = `${lo}~${hi} 사이엔 숫자가 ${span}개뿐이에요. 개수를 줄이거나 중복 허용을 켜 주세요`; return; }
+    const btn = $("#num-go"); btn.disabled = true;
+    const out = $("#num-out"); out.classList.toggle("many", cnt > 12);
+    let res;
+    if (NP.dup) res = Array.from({ length: cnt }, () => lo + rint(span));
+    else { const seen = new Set(); while (seen.size < cnt) seen.add(lo + rint(span)); res = [...seen]; }
+    if (NP.sort) res.sort((a, b) => a - b);
+    for (let i = 0; i < 10 && !reduce; i++) {
+      out.innerHTML = `<span class="num-chip" style="animation:none">${lo + rint(span)}</span>`; SFX.tick(); await sleep(50 + i * 12);
+    }
+    out.innerHTML = "";
+    for (const [i, n] of res.entries()) {
+      out.insertAdjacentHTML("beforeend", `<span class="num-chip">${n.toLocaleString("ko-KR")}</span>`);
+      if (cnt <= 12) { SFX.pop(); await sleep(120); } else if (i % 6 === 0) SFX.pop();
+    }
+    v.textContent = cnt === 1 ? `${lo}~${hi} 중에서 ${res[0]}!` : `${lo}~${hi} 중 ${cnt}개를 뽑았어요${NP.dup ? " (중복 허용)" : ""}`;
+    SFX.win(); buzz([20, 30]); if (cnt <= 3) confetti(40);
+    addLog("숫자", `${lo}~${hi}: ${res.join(", ")}`);
+    btn.disabled = false;
+  });
+
   /* ---------------- teams ---------------- */
   const tta = $("#team-names");
   tta.value = store.get("teamNames", "지민\n서준\n하윤\n도윤\n서연\n민준\n지우\n예준");
@@ -1053,7 +1286,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   const LUCK_COLORS = [["라벤더", "#B9A3F0"], ["토마토 레드", "#EE5A42"], ["해바라기 노랑", "#F5BF3C"], ["민트", "#7FD8BE"], ["하늘색", "#7CC4F2"], ["벚꽃 핑크", "#F7A8C4"], ["올리브", "#9AAE4F"], ["오렌지", "#F39A4E"], ["네이비", "#2E3E7A"], ["크림", "#FFF1C9"]];
   const LUCK_DIRS = ["동쪽", "서쪽", "남쪽", "북쪽", "동남쪽", "동북쪽", "남서쪽", "북서쪽"];
   const LUCK_ITEMS = ["동전 지갑", "줄무늬 양말", "초콜릿", "이어폰", "손수건", "볼펜", "따뜻한 커피", "머리끈", "우산", "스티커", "립밤", "열쇠고리"];
-  const LUCK_TABS = [["lotto", "로또 번호 뽑기"], ["menu", "메뉴 슬롯 돌리기"], ["roulette", "룰렛 돌리기"], ["coin", "동전 던지기"], ["ladder", "사다리 타기"], ["team", "팀 나누기"], ["tarot", "운 카드 뽑기"]];
+  const LUCK_TABS = [["lotto", "로또 번호 뽑기"], ["menu", "메뉴 슬롯 돌리기"], ["roulette", "룰렛 돌리기"], ["coin", "동전 던지기"], ["ladder", "사다리 타기"], ["team", "팀 나누기"], ["number", "숫자 뽑기"], ["tarot", "운 카드 뽑기"]];
   const luckLine = (sc) => sc >= 90 ? "오늘은 운이 넘쳐요! 뭐든 일단 해보세요" : sc >= 75 ? "운이 꽤 좋은 날. 작은 도전에 딱이에요"
     : sc >= 55 ? "무난하게 흘러가는 날. 소소한 행운을 노려봐요" : sc >= 40 ? "살짝 흐린 날. 운보다 센스로 승부해요" : "운이 낮잠 자는 날. 대신 실험 결과는 더 재밌을지도?";
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
