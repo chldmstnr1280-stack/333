@@ -72,7 +72,53 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 }
 
 /* ---------- header ---------- */
-.masthead { display: grid; gap: 4px; }
+.masthead { display: grid; gap: 4px; position: relative; }
+.tabs::-webkit-scrollbar { display: none; }
+.sound-btn {
+  position: absolute; top: 0; right: 0; width: 44px; height: 44px; border-radius: 50%;
+  border: 1.5px solid var(--line); background: var(--card); font-size: 20px; line-height: 1; box-shadow: var(--shadow);
+}
+.sound-btn[aria-pressed="false"] { opacity: .65; }
+
+/* ---------- daily luck ---------- */
+.luck {
+  background: var(--card); border: 2px solid var(--ink); border-radius: 18px; padding: 16px 16px 14px;
+  display: grid; gap: 12px; box-shadow: 0 4px 0 var(--ink);
+}
+.luck-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.luck h2 { margin: 0; font-family: var(--f-hand); font-size: 26px; line-height: 1.1; }
+.luck-body { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.ring {
+  --p: 0; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(var(--ring, var(--violet)) calc(var(--p) * 1%), var(--violet-soft) 0);
+  transition: --p 1s;
+}
+.ring-in {
+  width: 80px; height: 80px; border-radius: 50%; background: var(--card); display: grid; place-items: center; align-content: center;
+}
+.ring-in strong { font-family: var(--f-mono); font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+.ring-in small { font-size: 11px; color: var(--muted); }
+.facts { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 14.5px; min-width: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.swatch { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--ink); flex: none; }
+.luck-msg { margin: 0; font-family: var(--f-hand); font-size: 20px; line-height: 1.35; }
+.luck-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.luck-foot input {
+  font: inherit; font-size: 14.5px; color: var(--ink); background: var(--paper); border: 1.5px solid var(--line);
+  border-radius: 10px; padding: 6px 10px; flex: 1 1 140px; min-width: 0;
+}
+.luck-foot .small-btn { background: var(--violet-soft); border-color: var(--violet); color: var(--violet); font-weight: 700; }
+@media (max-width: 360px) { .luck-body { grid-template-columns: 1fr; justify-items: center; } }
+
+/* ---------- teams ---------- */
+.teams-out { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.team { border: 2px solid var(--c); border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; align-content: start; }
+.team h3 { margin: 0; font-family: var(--f-hand); font-size: 22px; color: var(--c); display: flex; justify-content: space-between; align-items: baseline; }
+.team h3 small { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.team ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.team li { background: var(--paper); border-radius: 999px; padding: 2px 10px; font-size: 14.5px; animation: pop .35s cubic-bezier(.3,1.6,.5,1) both; }
+
 .eyebrow {
   font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted);
   text-transform: uppercase;
@@ -86,13 +132,15 @@ h1 .flask { display: inline-block; transform: rotate(-8deg); }
 
 /* ---------- tabs ---------- */
 .tabs {
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px;
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
   padding-block: 8px; background: var(--paper);
 }
 .tab {
   border: 1.5px solid var(--line); background: var(--card); border-radius: 12px;
-  padding: 8px 2px 6px; display: grid; justify-items: center; gap: 2px; min-width: 0;
+  padding: 8px 2px 6px; display: grid; justify-items: center; gap: 2px; flex: 1 0 62px; min-width: 62px;
+  scroll-snap-align: center;
   box-shadow: var(--shadow); transition: transform .12s;
 }
 .tab .ico { font-size: 22px; line-height: 1; }
@@ -317,7 +365,26 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     <span class="eyebrow">Lab of Luck · 오늘의 실험 노트</span>
     <h1>운빨 실험실 <span class="flask" aria-hidden="true">🧪</span></h1>
     <p class="sub">결과보다 해봤다는 게 중요해요. 오늘의 운을 하나씩 시험해 보세요.</p>
+    <button class="sound-btn" id="sound-btn" aria-pressed="true" aria-label="효과음 켜고 끄기">🔊</button>
   </header>
+
+  <section class="luck" aria-labelledby="luck-title">
+    <div class="luck-head"><h2 id="luck-title">오늘의 행운 지수</h2><span class="exp-no" id="luck-date"></span></div>
+    <div class="luck-body">
+      <div class="ring" id="luck-ring"><div class="ring-in"><strong id="luck-score">--</strong><small>/ 100</small></div></div>
+      <dl class="facts">
+        <dt>행운의 색</dt><dd><span class="swatch" id="luck-swatch"></span><span id="luck-color"></span></dd>
+        <dt>행운의 숫자</dt><dd id="luck-num"></dd>
+        <dt>행운의 방향</dt><dd id="luck-dir"></dd>
+        <dt>행운템</dt><dd id="luck-item"></dd>
+      </dl>
+    </div>
+    <p class="luck-msg" id="luck-msg"></p>
+    <div class="luck-foot">
+      <input id="luck-name" maxlength="12" placeholder="이름을 넣으면 나만의 지수" aria-label="이름이나 별명">
+      <button class="small-btn" id="luck-go"></button>
+    </div>
+  </section>
 
   <nav class="tabs" role="tablist" aria-label="실험 고르기">
     <button class="tab" role="tab" id="tab-lotto" data-view="lotto" aria-selected="true"><span class="ico" aria-hidden="true">🎱</span><span class="lbl">로또</span></button>
@@ -325,6 +392,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     <button class="tab" role="tab" id="tab-roulette" data-view="roulette" aria-selected="false"><span class="ico" aria-hidden="true">🎡</span><span class="lbl">룰렛</span></button>
     <button class="tab" role="tab" id="tab-coin" data-view="coin" aria-selected="false"><span class="ico" aria-hidden="true">🎲</span><span class="lbl">주사위</span></button>
     <button class="tab" role="tab" id="tab-ladder" data-view="ladder" aria-selected="false"><span class="ico" aria-hidden="true">🪜</span><span class="lbl">사다리</span></button>
+    <button class="tab" role="tab" id="tab-team" data-view="team" aria-selected="false"><span class="ico" aria-hidden="true">👥</span><span class="lbl">팀 나누기</span></button>
     <button class="tab" role="tab" id="tab-tarot" data-view="tarot" aria-selected="false"><span class="ico" aria-hidden="true">🃏</span><span class="lbl">운 카드</span></button>
   </nav>
 
@@ -425,6 +493,30 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     </div>
   </section>
 
+  <!-- 팀 나누기 -->
+  <section class="bench" id="view-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+    <div class="bench-head"><h2>팀 나누기</h2><span class="exp-no">EXP-07 · 무작위 조 편성</span></div>
+    <p class="hypo">가설: 친한 사람끼리만 모이면 실험이 재미없다.</p>
+    <label class="fld" for="team-names">참가자 (한 줄에 한 명, 쉼표도 돼요)
+      <textarea id="team-names"></textarea>
+    </label>
+    <div class="row">
+      <div class="row" role="group" aria-label="나누는 방법">
+        <button class="chip" data-tmode="teams" aria-pressed="true">팀 수로</button>
+        <button class="chip" data-tmode="size" aria-pressed="false">팀당 인원으로</button>
+      </div>
+      <div class="stepper" role="group" aria-label="숫자 조절">
+        <button class="small-btn" id="team-minus" aria-label="하나 줄이기">−</button>
+        <output id="team-k" aria-live="polite">2팀</output>
+        <button class="small-btn" id="team-plus" aria-label="하나 늘리기">+</button>
+      </div>
+    </div>
+    <button class="go" id="team-go">팀 나누기</button>
+    <div class="teams-out" id="team-out" aria-live="polite"></div>
+    <p class="verdict" id="team-verdict"></p>
+    <button class="small-btn" id="team-copy" hidden>결과 복사하기</button>
+  </section>
+
   <!-- 타로 -->
   <section class="bench" id="view-tarot" role="tabpanel" aria-labelledby="tab-tarot" hidden>
     <div class="bench-head"><h2>오늘의 운 카드</h2><span class="exp-no">EXP-05 · 메이저 아르카나 22장</span></div>
@@ -471,14 +563,67 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
   };
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  /* ---------------- sound ---------------- */
+  const SFX = (() => {
+    let ctx = null, on = store.get("sound", true), noiseBuf = null;
+    function ac() {
+      if (!on) return null;
+      try {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      } catch { return null; }
+    }
+    function tone(freq, dur, { type = "sine", vol = 0.15, at = 0, slide = 0 } = {}) {
+      const c = ac(); if (!c) return;
+      const t = c.currentTime + at, o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * slide), t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.03);
+    }
+    function noise(dur, { vol = 0.12, at = 0, hp = 800 } = {}) {
+      const c = ac(); if (!c) return;
+      if (!noiseBuf) {
+        noiseBuf = c.createBuffer(1, c.sampleRate * 0.5, c.sampleRate);
+        const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      }
+      const t = c.currentTime + at, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = noiseBuf; f.type = "highpass"; f.frequency.value = hp;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f).connect(g).connect(c.destination); src.start(t); src.stop(t + dur + 0.02);
+    }
+    return {
+      get on() { return on; },
+      toggle() { on = !on; store.set("sound", on); if (on) this.pop(); return on; },
+      tick: () => tone(1250, 0.035, { type: "square", vol: 0.04 }),
+      pop: () => tone(520, 0.12, { type: "triangle", vol: 0.12, slide: 1.8 }),
+      win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, { type: "triangle", vol: 0.12, at: i * 0.09 })),
+      ding: () => { tone(1320, 0.6, { vol: 0.1 }); tone(1980, 0.4, { vol: 0.04 }); },
+      flip: () => { for (let i = 0; i < 10; i++) tone(950 + i * 30, 0.03, { type: "square", vol: 0.025, at: i * 0.14 }); },
+      rattle: () => { for (let i = 0; i < 7; i++) noise(0.04, { vol: 0.18, at: i * 0.06 + Math.random() * 0.02, hp: 1800 }); },
+      shimmer: () => [1568, 1760, 2093, 2349, 2637].forEach((f, i) => tone(f, 0.35, { vol: 0.045, at: i * 0.06 })),
+      drum: (dur = 1) => { for (let t = 0; t < dur; t += 0.05) noise(0.045, { vol: 0.04 + (t / dur) * 0.1, at: t, hp: 250 }); },
+      slide: (dur = 1.3) => tone(880, dur, { type: "triangle", vol: 0.05, slide: 0.45 }),
+      boo: () => { tone(330, 0.25, { type: "sawtooth", vol: 0.05 }); tone(247, 0.4, { type: "sawtooth", vol: 0.05, at: 0.22 }); },
+    };
+  })();
+  const sbtn = $("#sound-btn");
+  const paintSound = () => { sbtn.textContent = SFX.on ? "🔊" : "🔇"; sbtn.setAttribute("aria-pressed", String(SFX.on)); };
+  paintSound();
+  sbtn.addEventListener("click", () => { SFX.toggle(); paintSound(); });
+
   /* ---------------- tabs ---------------- */
-  const views = ["lotto", "menu", "roulette", "coin", "ladder", "tarot"];
+  const views = ["lotto", "menu", "roulette", "coin", "ladder", "team", "tarot"];
   function show(v) {
     if (!views.includes(v)) v = "lotto";
     $$(".tab").forEach((t) => t.setAttribute("aria-selected", String(t.dataset.view === v)));
     views.forEach((x) => { $("#view-" + x).hidden = x !== v; });
     if (v === "roulette") drawWheel();
     if (v === "ladder") drawLadder();
+    const t = $("#tab-" + v), bar = $(".tabs");
+    if (t && bar) bar.scrollTo({ left: t.offsetLeft - (bar.clientWidth - t.offsetWidth) / 2, behavior: reduce ? "auto" : "smooth" });
   }
   $$(".tab").forEach((t) => t.addEventListener("click", () => {
     const v = t.dataset.view;
@@ -561,12 +706,12 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
         const s = document.createElement("span");
         s.className = `ball ${ballClass(n)}${animate ? " pop" : ""}`; s.textContent = n;
         wrap.appendChild(s);
-        if (animate) { buzz(8); await sleep(games > 1 ? 70 : 160); }
+        if (animate) { buzz(8); SFX.pop(); await sleep(games > 1 ? 70 : 160); }
       }
     }
     btn.disabled = false;
     if (animate) {
-      confetti(60);
+      confetti(60); SFX.win();
       addLog("로또", results.map((r) => r.main.join(" ") + (withBonus ? ` +${r.bonus}` : "")).join(" / "));
     }
   }
@@ -599,11 +744,11 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     let delay = 45;
     for (let i = 0; i < 26 && !reduce; i++) {
       el.textContent = pick(pool); el.classList.remove("tick"); void el.offsetWidth; el.classList.add("tick");
-      buzz(4); await sleep(delay); delay *= 1.1;
+      buzz(4); SFX.tick(); await sleep(delay); delay *= 1.1;
     }
     el.textContent = final; el.classList.remove("tick"); void el.offsetWidth; el.classList.add("landed");
     $("#menu-verdict").textContent = pick(MENU_LINES);
-    buzz([20, 40, 30]); confetti(50);
+    buzz([20, 40, 30]); confetti(50); SFX.win();
     addLog("메뉴", `${final} (${catOf(final)})`);
     btn.disabled = false;
   });
@@ -650,6 +795,19 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     ta.value = PRESETS[b.dataset.preset].join("\n"); store.set("wheel", ta.value);
     $("#wheel-verdict").textContent = ""; drawWheel();
   }));
+  function tickWheel(seg, ms) {
+    let last = null; const end = performance.now() + ms;
+    (function f() {
+      const m = getComputedStyle(wheel).transform.match(/matrix\(([^)]+)\)/);
+      if (m) {
+        const [a, b] = m[1].split(",").map(Number);
+        const idx = Math.floor((((Math.atan2(b, a) * 180) / Math.PI) + 360) % 360 / seg);
+        if (last !== null && idx !== last) SFX.tick();
+        last = idx;
+      }
+      if (performance.now() < end) requestAnimationFrame(f);
+    })();
+  }
   $("#wheel-go").addEventListener("click", async () => {
     const list = items();
     if (list.length < 2) { $("#wheel-verdict").textContent = "항목을 두 개 이상 적어 주세요"; return; }
@@ -663,9 +821,10 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     $("#wheel-verdict").textContent = "빙글빙글…";
     wheel.style.transition = reduce ? "none" : "transform 4.2s cubic-bezier(.12,.75,.15,1)";
     wheel.style.transform = `rotate(${rot}deg)`;
+    if (!reduce) tickWheel(seg, 4250);
     await sleep(4300);
     $("#wheel-verdict").innerHTML = `결과: <b style="color:var(--tomato)">${esc(list[w])}</b>`;
-    buzz([30, 50, 30]); confetti(70);
+    buzz([30, 50, 30]); confetti(70); SFX.win();
     addLog("룰렛", list[w]);
     spinning = false; $("#wheel-go").disabled = false;
   });
@@ -681,11 +840,11 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     const target = heads ? 0 : 180;
     coinRot += 1800 + ((target - curFace + 360) % 360);
     $("#coin").style.transform = `rotateY(${coinRot}deg)`;
-    $("#coin-verdict").textContent = "휘리릭…";
+    $("#coin-verdict").textContent = "휘리릭…"; SFX.flip();
     await sleep(1650);
     heads ? tally.h++ : tally.t++; store.set("tally", tally); renderTally();
     $("#coin-verdict").textContent = heads ? "앞면! (YES)" : "뒷면! (NO)";
-    buzz(25); addLog("동전", heads ? "앞면" : "뒷면");
+    buzz(25); SFX.ding(); addLog("동전", heads ? "앞면" : "뒷면");
     btn.disabled = false;
   });
 
@@ -706,12 +865,12 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     const btn = $("#dice-go"); btn.disabled = true;
     for (let i = 0; i < 6 && !reduce; i++) { renderDice(Array.from({ length: diceN }, () => rint(6) + 1), false); await sleep(60); }
     const vals = Array.from({ length: diceN }, () => rint(6) + 1);
-    renderDice(vals, true);
+    renderDice(vals, true); SFX.rattle();
     await sleep(500);
     const sum = vals.reduce((a, b) => a + b, 0);
     const same = diceN > 1 && vals.every((v) => v === vals[0]);
     $("#dice-verdict").textContent = `합계 ${sum}${same ? " · 더블!" : ""}`;
-    if (same) confetti(50);
+    if (same) { confetti(50); SFX.win(); }
     buzz(20); addLog("주사위", `${vals.join(" + ")} = ${sum}${same ? " (더블)" : ""}`);
     btn.disabled = false;
   });
@@ -818,13 +977,14 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
       pl.getBoundingClientRect();
       pl.style.transition = "stroke-dashoffset 1.3s linear"; pl.style.strokeDashoffset = 0;
     }
-    $("#ladder-verdict").textContent = `${name} 내려가는 중…`;
+    $("#ladder-verdict").textContent = `${name} 내려가는 중…`; SFX.slide();
     await sleep(1350);
     ldone.set(col, end); lbusy = false;
     const prize = L.prizes[end] || "?";
     renderLadder();
     $("#ladder-verdict").innerHTML = `${esc(name)} → <b style="color:var(--tomato)">${esc(prize)}</b>`;
     buzz(25);
+    if (isWin(prize)) SFX.win(); else if (/꽝/.test(prize)) SFX.boo(); else SFX.ding();
     if (log) { addLog("사다리", `${name} → ${prize}`); if (isWin(prize)) confetti(60); }
     if (ldone.size === ln()) $("#ladder-all").hidden = true;
   }
@@ -843,6 +1003,87 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
     addLog("사다리", sum); confetti(70);
   });
   $("#ladder-reset").addEventListener("click", () => { if (lbusy) return; lplay = false; ldone = new Map(); renderLadder(); $("#ladder-verdict").textContent = "위엔 이름, 아래엔 결과를 적고 시작하세요"; });
+
+  /* ---------------- teams ---------------- */
+  const tta = $("#team-names");
+  tta.value = store.get("teamNames", "지민\n서준\n하윤\n도윤\n서연\n민준\n지우\n예준");
+  let tmode = store.get("teamMode", "teams"), tk = store.get("teamK", 2), lastTeams = null;
+  const tnames = () => tta.value.split(/\n|,/).map((s) => s.trim()).filter(Boolean);
+  function paintTeamCtl() {
+    $$("[data-tmode]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tmode === tmode)));
+    $("#team-k").textContent = tk + (tmode === "teams" ? "팀" : "명씩");
+  }
+  const setK = (v) => { tk = Math.max(2, Math.min(10, v)); store.set("teamK", tk); paintTeamCtl(); };
+  $("#team-minus").addEventListener("click", () => setK(tk - 1));
+  $("#team-plus").addEventListener("click", () => setK(tk + 1));
+  $$("[data-tmode]").forEach((b) => b.addEventListener("click", () => { tmode = b.dataset.tmode; store.set("teamMode", tmode); paintTeamCtl(); }));
+  tta.addEventListener("input", () => store.set("teamNames", tta.value));
+  paintTeamCtl();
+  const teamName = (i) => String.fromCharCode(65 + i) + "팀";
+  $("#team-go").addEventListener("click", async () => {
+    const names = tnames();
+    if (names.length < 2) { $("#team-verdict").textContent = "참가자를 두 명 이상 적어 주세요"; return; }
+    const k = tmode === "teams" ? Math.min(tk, names.length) : Math.max(1, Math.ceil(names.length / tk));
+    if (k < 2) { $("#team-verdict").textContent = "인원이 적어서 한 팀밖에 안 나와요. 숫자를 줄여 보세요"; return; }
+    const btn = $("#team-go"); btn.disabled = true; $("#team-copy").hidden = true;
+    const teams = Array.from({ length: k }, () => []);
+    shuffle(names).forEach((n, i) => teams[i % k].push(n));
+    lastTeams = shuffle(teams);
+    $("#team-out").innerHTML = ""; $("#team-verdict").textContent = "두구두구…";
+    SFX.drum(0.9); await sleep(950);
+    $("#team-out").innerHTML = lastTeams.map((t, i) => `<div class="team" style="--c:${LCOLORS[i % LCOLORS.length]}">
+      <h3>${teamName(i)} <small>${t.length}명</small></h3>
+      <ul>${t.map((n, j) => `<li style="animation-delay:${reduce ? 0 : (j * k + i) * 60}ms">${esc(n)}</li>`).join("")}</ul></div>`).join("");
+    $("#team-verdict").textContent = `${names.length}명을 ${k}팀으로 나눴어요`;
+    $("#team-copy").hidden = false;
+    SFX.win(); buzz([20, 40, 30]); confetti(50);
+    addLog("팀", lastTeams.map((t, i) => `${teamName(i)}: ${t.join(" ")}`).join(" / "));
+    btn.disabled = false;
+  });
+  $("#team-copy").addEventListener("click", () => {
+    if (!lastTeams) return;
+    const text = "[운빨 실험실 팀 나누기]\n" + lastTeams.map((t, i) => `${teamName(i)}: ${t.join(", ")}`).join("\n");
+    const done = (ok) => { $("#team-verdict").textContent = ok ? "복사했어요! 단톡방에 붙여넣어 보세요" : "복사가 막혀 있어요. 결과를 길게 눌러 복사해 주세요"; };
+    try { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); } catch { done(false); }
+  });
+
+  /* ---------------- daily luck ---------------- */
+  function hashStr(str) { let h = 2166136261; for (const ch of str) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const LUCK_COLORS = [["라벤더", "#B9A3F0"], ["토마토 레드", "#EE5A42"], ["해바라기 노랑", "#F5BF3C"], ["민트", "#7FD8BE"], ["하늘색", "#7CC4F2"], ["벚꽃 핑크", "#F7A8C4"], ["올리브", "#9AAE4F"], ["오렌지", "#F39A4E"], ["네이비", "#2E3E7A"], ["크림", "#FFF1C9"]];
+  const LUCK_DIRS = ["동쪽", "서쪽", "남쪽", "북쪽", "동남쪽", "동북쪽", "남서쪽", "북서쪽"];
+  const LUCK_ITEMS = ["동전 지갑", "줄무늬 양말", "초콜릿", "이어폰", "손수건", "볼펜", "따뜻한 커피", "머리끈", "우산", "스티커", "립밤", "열쇠고리"];
+  const LUCK_TABS = [["lotto", "로또 번호 뽑기"], ["menu", "메뉴 슬롯 돌리기"], ["roulette", "룰렛 돌리기"], ["coin", "동전 던지기"], ["ladder", "사다리 타기"], ["team", "팀 나누기"], ["tarot", "운 카드 뽑기"]];
+  const luckLine = (sc) => sc >= 90 ? "오늘은 운이 넘쳐요! 뭐든 일단 해보세요" : sc >= 75 ? "운이 꽤 좋은 날. 작은 도전에 딱이에요"
+    : sc >= 55 ? "무난하게 흘러가는 날. 소소한 행운을 노려봐요" : sc >= 40 ? "살짝 흐린 날. 운보다 센스로 승부해요" : "운이 낮잠 자는 날. 대신 실험 결과는 더 재밌을지도?";
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  let luckTab = "lotto";
+  function renderLuck() {
+    const name = $("#luck-name").value.trim(), day = today();
+    const r = mulberry(hashStr(day + "|" + name));
+    const score = Math.round(30 + r() * 70);
+    const [cName, cHex] = LUCK_COLORS[Math.floor(r() * LUCK_COLORS.length)];
+    const num = 1 + Math.floor(r() * 45), dir = LUCK_DIRS[Math.floor(r() * LUCK_DIRS.length)];
+    const item = LUCK_ITEMS[Math.floor(r() * LUCK_ITEMS.length)];
+    const [tab, tabLabel] = LUCK_TABS[Math.floor(r() * LUCK_TABS.length)];
+    luckTab = tab;
+    $("#luck-date").textContent = day.replace(/-/g, ".") + (name ? ` · ${name}` : "");
+    $("#luck-score").textContent = score;
+    const ring = $("#luck-ring");
+    ring.style.setProperty("--p", score);
+    ring.style.setProperty("--ring", score >= 75 ? "var(--leaf)" : score >= 50 ? "var(--violet)" : "var(--tomato)");
+    $("#luck-swatch").style.background = cHex; $("#luck-color").textContent = cName;
+    $("#luck-num").textContent = num; $("#luck-dir").textContent = dir; $("#luck-item").textContent = item;
+    $("#luck-msg").textContent = (name ? name + "님, " : "") + luckLine(score);
+    $("#luck-go").textContent = `추천 실험: ${tabLabel} →`;
+  }
+  $("#luck-name").value = store.get("luckName", "");
+  $("#luck-name").addEventListener("input", () => { store.set("luckName", $("#luck-name").value); renderLuck(); });
+  $("#luck-go").addEventListener("click", () => {
+    SFX.pop(); location.hash = luckTab;
+    $(".tabs").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  });
+  renderLuck();
 
   /* ---------------- tarot ---------------- */
   const TAROT = [
@@ -886,7 +1127,7 @@ textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
           <ul class="todo" aria-label="오늘 해볼 것">${todo.map((t) => `<li>${t}</li>`).join("")}</ul>
         </div></div>`;
       $("#tarot-reset").hidden = false;
-      buzz(30); if (num === "X" || num === "XIX" || num === "XXI") confetti(80);
+      buzz(30); SFX.shimmer(); if (num === "X" || num === "XIX" || num === "XXI") confetti(80);
       addLog("운 카드", `${num}. ${ko} → ${todo[0]}`);
     }));
   }
